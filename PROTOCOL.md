@@ -127,8 +127,15 @@ Observed on physical hardware:
 - OEM command ordering, image header fields, report length and JPEG streaming.
 - Linux interrupt OUT payloads reaching the device successfully.
 
-Not yet established: a user-confirmed Linux LCD update, image orientation,
-complete touch press/release semantics and long-running reliability. The initial
-single-image experiment did not change the visible factory screen. Later runs
-added OEM mode selection, full-grid initialization and continuous heartbeat;
-those require separate physical confirmation.
+After the experiments, the user reported that the screen had changed to a
+**4×4 button grid**. That observation takes precedence over the static model's
+four-column, three-row setting. Whether the grid contains this tool's numbered
+Linux artwork, and how its physical cells map to wire indices, is not yet
+confirmed. Do not change the wire key count from 12 to 16 solely on that basis.
+
+Still unverified: attribution of the visible grid to the Linux image upload,
+image orientation, touch press/release semantics and long-running reliability.
+The initial single-image experiment did not change the factory screen. Later
+runs added OEM mode selection, full-grid initialization and continuous heartbeat.
+A subsequent raw-input capture preserves the current display while the user
+checks its four corners.
