@@ -16,7 +16,9 @@ The display is a small macro panel, not an HDMI/DisplayLink desktop monitor.
 
 ## Setup
 
-Python 3.10 or newer. Pillow is required only for `show` and `demo`.
+Python 3.11 or newer. Pillow is required only for `show` and `demo`.
+Use the pinned Pillow 13.0.0 release; earlier versions have reported
+[image-decoding security advisories](https://github.com/advisories/GHSA-5x8w-8jj5-q52h).
 
 ```sh
 python3 -m venv .venv
