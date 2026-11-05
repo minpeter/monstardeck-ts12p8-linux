@@ -4,10 +4,11 @@ Original Python/hidraw controller and reverse-engineering notes for the
 **Monstar Gear Monstar Deck TS12P8**, USB `0400:1003`.
 
 **Hardware research in progress.** Device discovery and firmware reads work on
-real hardware. The original Windows program's USB image transfers have been
-captured and reproduced in Linux. **A visible Linux LCD update and touch-event
-semantics are not yet verified. Do not treat this as a working general-purpose
-touchscreen driver.** See [PROTOCOL.md](PROTOCOL.md) for observations and limits.
+real hardware. OEM USB image transfers have been captured and reproduced in
+Linux. A user-operated input capture received reports containing all key indices
+1–12. **Physical layout, visible Linux artwork and press/release semantics remain
+unverified. This is not a general-purpose touchscreen driver.** See
+[PROTOCOL.md](PROTOCOL.md) for observations and limits.
 
 The integrated hub, Ethernet and other peripherals are separate devices. This
 controller opens only the matching HID interface. It does not replace a kernel
@@ -76,10 +77,11 @@ numbered-grid photograph establishes it.
 sudo python3 ts12p8.py watch --seconds 120
 ```
 
-No shell commands, simulated keystrokes or macros are executed. Reports are
-printed with their actual byte count and complete hex payload. The device's
-command responses must not be mistaken for presses: the generic manufacturer's
-parser is not sufficient to establish touch semantics on this model.
+No shell commands, simulated keystrokes or macros are executed. Reports retain
+their actual byte count and complete hex payload. Reports matching the observed
+512-byte `ACK..OK...` shape also include `key_candidate` (1–12) and `state_byte`.
+These are diagnostic fields, not confirmed press/release events: command replies
+can resemble key reports. Unknown reports remain raw without annotations.
 
 Only one controller should use the device at a time. An advisory lock prevents
 two instances of this tool from interleaving image streams; unrelated programs
@@ -88,7 +90,7 @@ may ignore that lock. Unplug/replug can change the hidraw node number.
 ## Library use
 
 ```python
-from ts12p8 import Deck, discover, encode_image
+from ts12p8 import Deck, discover, encode_image, describe_report
 from PIL import Image
 
 with Image.open("photo.png") as image:
@@ -102,7 +104,7 @@ with Deck(discover()[0]) as deck:
     deck.brightness(100)
     deck.mode(2)
     for report in deck.reports(60):
-        print(report.hex())
+        print(describe_report(report))
 ```
 
 Encoding happens before any display mutation. `Deck.close()` closes the file

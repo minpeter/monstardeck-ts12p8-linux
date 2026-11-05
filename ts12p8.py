@@ -39,6 +39,16 @@ def encode_image(image):
     return data.getvalue()
 
 
+def describe_report(data):
+    """Preserve raw input and annotate observed key-shaped ACKs, not touch events."""
+    result = {"length": len(data), "hex": data.hex()}
+    if (len(data) == REPORT_SIZE and data.startswith(b"ACK\0\0OK\0\0")
+            and 1 <= data[9] <= KEY_COUNT and not any(data[11:])):
+        result["key_candidate"] = data[9]
+        result["state_byte"] = data[10]
+    return result
+
+
 class Deck:
     def __init__(self, path):
         self.fd = os.open(path, os.O_RDWR | os.O_NONBLOCK | os.O_CLOEXEC)
@@ -179,7 +189,7 @@ def main(argv=None):
         elif args.operation == "watch":
             print(json.dumps({"listening": str(path), "seconds": args.seconds}), flush=True)
             for data in deck.reports(args.seconds):
-                print(json.dumps({"length": len(data), "hex": data.hex()}), flush=True)
+                print(json.dumps(describe_report(data)), flush=True)
         else:
             deck.firmware()
             deck.wake()
@@ -191,7 +201,7 @@ def main(argv=None):
             deck.mode(2)
             print(f"Sent {len(images)} image(s) to {path}; listening with heartbeat.", flush=True)
             for data in deck.reports(args.seconds):
-                print(json.dumps({"length": len(data), "hex": data.hex()}), flush=True)
+                print(json.dumps(describe_report(data)), flush=True)
     return 0
 
 

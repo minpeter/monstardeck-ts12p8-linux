@@ -108,15 +108,29 @@ Relevant DLL functions:
 ## Input: do not equate every ACK with a touch
 
 The DLL's generic input branch forwards offsets 9 and 10 as a key number and
-state. This is **not yet sufficient to declare a TS12P8 touch event format**.
-An observed report began `41 43 4b 00 00 4f 4b 00 00 01 00` (`ACK..OK...`).
-Its physical origin was not established, so it is not used as a test touch.
+state. An early report began `41 43 4b 00 00 4f 4b 00 00 01 00`
+(`ACK..OK...`); its physical origin was not established.
 
-The manufacturer's package includes a warning that some command responses can
-look like key presses on other models. Therefore `watch` and the display CLI
-print exact reports as JSON and never execute keyboard events or commands.
-No consumer should bind actions to the generic offsets until real press/release
-captures on this model establish a discriminating rule.
+During a later heartbeat-only Linux `watch`, the user reported pressing the
+screen buttons in order. The capture contained 28 reports, each 512 bytes:
+
+`1, 2, 7, 3, 8, 8, 8, 4, 5, 6, 7, 8, 9, 10, 11, 12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12`
+
+All had the nine-byte prefix `ACK\0\0OK\0\0`, the listed index at byte 9,
+zero at byte 10 and zeros afterward. A preceding 15-minute watch had received
+no reports. This establishes user-correlated input reception, but does not
+establish one report per physical tap, corner mapping, or press/release edges.
+In particular, do not interpret byte 10's observed zero as a released state.
+
+`describe_report` annotates this exact shape with `key_candidate` and
+`state_byte`, preserving the full raw payload. It leaves unknown lengths,
+headers, out-of-range indices and reports with extra payload unannotated.
+All observed repeated indices are preserved; there is no guessed debounce.
+
+The manufacturer's package warns that some command responses resemble presses
+on other models. No consumer should bind actions to these candidates until a
+controlled hold/release capture establishes a discriminating rule. The CLI
+never executes keyboard events or commands.
 
 ## Verification boundary
 
@@ -126,6 +140,7 @@ Observed on physical hardware:
 - Read-only firmware query through both Linux hidraw and the OEM Windows DLL.
 - OEM command ordering, image header fields, report length and JPEG streaming.
 - Linux interrupt OUT payloads reaching the device successfully.
+- User-correlated Linux input reports carrying every wire index from 1 through 12.
 
 After the experiments, the user reported that the screen had changed to a
 **4×4 button grid**. That observation takes precedence over the static model's
@@ -137,5 +152,5 @@ Still unverified: attribution of the visible grid to the Linux image upload,
 image orientation, touch press/release semantics and long-running reliability.
 The initial single-image experiment did not change the factory screen. Later
 runs added OEM mode selection, full-grid initialization and continuous heartbeat.
-A subsequent raw-input capture preserves the current display while the user
-checks its four corners.
+Raw-input capture preserves the current display. Controlled hold/release input
+and a photograph of the numbered artwork are still needed.
