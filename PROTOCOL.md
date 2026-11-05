@@ -119,13 +119,21 @@ screen buttons in order. The capture contained 28 reports, each 512 bytes:
 All had the nine-byte prefix `ACK\0\0OK\0\0`, the listed index at byte 9,
 zero at byte 10 and zeros afterward. A preceding 15-minute watch had received
 no reports. This establishes user-correlated input reception, but does not
-establish one report per physical tap, corner mapping, or press/release edges.
+establish one report per physical tap, complete corner mapping, or press/release edges.
 In particular, do not interpret byte 10's observed zero as a released state.
 
 `describe_report` annotates this exact shape with `key_candidate` and
 `state_byte`, preserving the full raw payload. It leaves unknown lengths,
 headers, out-of-range indices and reports with extra payload unannotated.
 All observed repeated indices are preserved; there is no guessed debounce.
+
+A separate controlled check requested holding only the upper-left button for
+three seconds, then releasing it. After the user confirmed completion, the new
+capture session contained exactly one report: `key_candidate: 1, state_byte: 0`.
+This maps wire index 1 to the upper-left cell in the currently displayed layout.
+No second edge report or held-repeat report was observed for this check.
+Without synchronized gesture timing, the single packet cannot establish whether
+it is emitted on contact or release. Do not synthesize a press/release pair.
 
 The manufacturer's package warns that some command responses resemble presses
 on other models. No consumer should bind actions to these candidates until a
@@ -152,5 +160,11 @@ Still unverified: attribution of the visible grid to the Linux image upload,
 image orientation, touch press/release semantics and long-running reliability.
 The initial single-image experiment did not change the factory screen. Later
 runs added OEM mode selection, full-grid initialization and continuous heartbeat.
-Raw-input capture preserves the current display. Controlled hold/release input
-and a photograph of the numbered artwork are still needed.
+Raw-input capture preserves the current display. The controlled hold check above
+is complete; determining the emitting edge still needs synchronized timing.
+A photograph of the currently displayed artwork is also still needed.
+
+For a distinct visual check, a subsequent Linux upload sent a green 70×70 JPEG
+labelled `LINUX / OK 1` to wire index 1, followed by `STP` and heartbeat.
+It issued no `CLE` command and did not upload to other indices. The upload
+completed without an OS write error; its visible result awaits user confirmation.
