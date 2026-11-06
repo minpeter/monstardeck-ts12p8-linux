@@ -157,7 +157,7 @@ Linux artwork, and how its physical cells map to wire indices, is not yet
 confirmed. Do not change the wire key count from 12 to 16 solely on that basis.
 
 Still unverified: attribution of the visible grid to the Linux image upload,
-image orientation, touch press/release semantics and long-running reliability.
+image orientation, touch press/release semantics and long-running LCD behavior.
 The initial single-image experiment did not change the factory screen. Later
 runs added OEM mode selection, full-grid initialization and continuous heartbeat.
 Raw-input capture preserves the current display. The controlled hold check above
@@ -168,3 +168,10 @@ For a distinct visual check, a subsequent Linux upload sent a green 70×70 JPEG
 labelled `LINUX / OK 1` to wire index 1, followed by `STP` and heartbeat.
 It issued no `CLE` command and did not upload to other indices. The upload
 completed without an OS write error; its visible result awaits user confirmation.
+
+That targeted-upload session subsequently completed its 86,400-second
+heartbeat/read window with exit status 0 and no reported I/O error. It received
+ten further key-shaped reports carrying indices 1 and 5, all with state byte 0.
+Their gesture timing was not recorded, so they do not establish new press/release
+semantics. This is a 24-hour host-side transport observation, not proof that the
+LCD continuously showed the uploaded image. The bounded session is now stopped.
