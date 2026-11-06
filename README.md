@@ -3,12 +3,13 @@
 Original Python/hidraw controller and reverse-engineering notes for the
 **Monstar Gear Monstar Deck TS12P8**, USB `0400:1003`.
 
-**Hardware research in progress.** Device discovery and firmware reads work on
-real hardware. OEM USB image transfers have been captured and reproduced in
-Linux. A user-operated input capture received reports containing all key indices
-1–12. **Physical layout, visible Linux artwork and press/release semantics remain
-unverified. This is not a general-purpose touchscreen driver.** See
-[PROTOCOL.md](PROTOCOL.md) for observations and limits.
+**Hardware-tested basic Linux control.** The user confirmed that a green
+`LINUX / OK 1` image uploaded from Linux was visible on the device. Firmware
+reads and input reports containing indices 1–12 also work on physical hardware;
+a controlled upper-left hold produced index 1.
+**Full layout and press/release semantics remain unverified.** Input annotations
+are diagnostic, not macro bindings. This is not a general-purpose touchscreen
+driver. See [PROTOCOL.md](PROTOCOL.md) for observations and limits.
 
 The integrated hub, Ethernet and other peripherals are separate devices. This
 controller opens only the matching HID interface. It does not replace a kernel
@@ -31,6 +32,29 @@ Use an isolated environment rather than installing Python packages into the
 system interpreter. Root access to this one hidraw device is the simplest
 initial setup on a headless machine. This project does not install broad USB
 permission rules.
+
+### Optional system-wide CLI
+
+From the checkout, these commands install into a dedicated directory without
+changing system Python, USB permissions, firmware or boot services:
+
+```sh
+sudo install -d -m 755 /opt/monstardeck-ts12p8-linux
+sudo install -m 644 ts12p8.py requirements.txt README.md PROTOCOL.md LICENSE /opt/monstardeck-ts12p8-linux/
+sudo python3 -m venv /opt/monstardeck-ts12p8-linux/.venv
+sudo /opt/monstardeck-ts12p8-linux/.venv/bin/python -m pip install -r /opt/monstardeck-ts12p8-linux/requirements.txt
+sudo tee /usr/local/bin/monstardeck-ts12p8 >/dev/null <<'SH'
+#!/bin/sh
+exec /opt/monstardeck-ts12p8-linux/.venv/bin/python /opt/monstardeck-ts12p8-linux/ts12p8.py "$@"
+SH
+sudo chmod 755 /usr/local/bin/monstardeck-ts12p8
+sudo monstardeck-ts12p8 info
+```
+
+Then use `sudo monstardeck-ts12p8 demo`, `show photo.png --key 1`, or `watch`.
+Display commands stay in the foreground to maintain the connection; stop with
+Ctrl+C. Installing the CLI does not enable automatic startup or bind actions.
+
 
 ## Read firmware without changing the screen
 

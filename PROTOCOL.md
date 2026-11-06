@@ -152,22 +152,23 @@ Observed on physical hardware:
 
 After the experiments, the user reported that the screen had changed to a
 **4×4 button grid**. That observation takes precedence over the static model's
-four-column, three-row setting. Whether the grid contains this tool's numbered
-Linux artwork, and how its physical cells map to wire indices, is not yet
-confirmed. Do not change the wire key count from 12 to 16 solely on that basis.
+four-column, three-row setting. The initial grid's artwork and the complete
+physical-cell mapping remain unconfirmed. A later, distinct Linux upload was
+visually confirmed as described below. Do not infer 16 wire keys from the grid.
 
-Still unverified: attribution of the visible grid to the Linux image upload,
-image orientation, touch press/release semantics and long-running LCD behavior.
+Still unverified: full-grid layout and image orientation, touch press/release
+semantics and long-running LCD behavior.
 The initial single-image experiment did not change the factory screen. Later
 runs added OEM mode selection, full-grid initialization and continuous heartbeat.
 Raw-input capture preserves the current display. The controlled hold check above
 is complete; determining the emitting edge still needs synchronized timing.
-A photograph of the currently displayed artwork is also still needed.
+A photograph would be needed to resolve the full layout discrepancy.
 
 For a distinct visual check, a subsequent Linux upload sent a green 70×70 JPEG
 labelled `LINUX / OK 1` to wire index 1, followed by `STP` and heartbeat.
 It issued no `CLE` command and did not upload to other indices. The upload
-completed without an OS write error; its visible result awaits user confirmation.
+completed without an OS write error. The user subsequently confirmed that this
+green Linux artwork was visible on the physical screen.
 
 That targeted-upload session subsequently completed its 86,400-second
 heartbeat/read window with exit status 0 and no reported I/O error. It received
